@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
 
 // WEBHOOK GET: Verificación de Meta
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "bryan123"; // token de verificación
+  const VERIFY_TOKEN = "bryan123";
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
@@ -23,7 +23,7 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-// WEBHOOK POST: recibe mensajes y responde automáticamente
+// WEBHOOK POST: Recibe mensajes y responde menú
 app.post("/webhook", async (req, res) => {
   try {
     const messages = req.body.entry?.[0]?.changes?.[0]?.value?.messages;
@@ -55,12 +55,16 @@ Por favor elige una opción respondiendo con el número:
         to: from,
         text: { body: reply },
       },
-      { headers: { Authorization: `Bearer EAAW7lqynL1wBQyaWFf4V30yM4uYeoSxP7rZBxfSGW7mgPPrVglaSuuVZAtCVPATc5BZBiKA8XSWpoyhGinbjbrPrCRZBjZCGRCKoZCInQ6o3QPnmLzuRTfwZCaE93aefS628gfaMK4XVZApmJTHRxtsf3QTDqA9ZBjmRjKutVk3jQUHoI83q4eZC89yqofa3ZAs8dE4K6hqPGJW0VsGIL27alE2bKAc0Q2PGeGB3CkFM1IpH3ZAB9ffKQEKPKnT0AkSTlK7rii4L54TTy9BSuZATKLZCWKZBYIJCFudrE4ZD` } }
+      {
+        headers: {
+          Authorization: `Bearer EAAW7lqynL1wBQyaWFf4V30yM4uYeoSxP7rZBxfSGW7mgPPrVglaSuuVZAtCVPATc5BZBiKA8XSWpoyhGinbjbrPrCRZBjZCGRCKoZCInQ6o3QPnmLzuRTfwZCaE93aefS628gfaMK4XVZApmJTHRxtsf3QTDqA9ZBjmRjKutVk3jQUHoI83q4eZC89yqofa3ZAs8dE4K6hqPGJW0VsGIL27alE2bKAc0Q2PGeGB3CkFM1IpH3ZAB9ffKQEKPKnT0AkSTlK7rii4L54TTy9BSuZATKLZCWKZBYIJCFudrE4ZD`,
+        },
+      }
     );
 
     res.sendStatus(200);
   } catch (err) {
-    console.error(err);
+    console.error("Error webhook POST:", err.response?.data || err);
     res.sendStatus(500);
   }
 });
