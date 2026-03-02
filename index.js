@@ -4,12 +4,12 @@ const app = express();
 
 app.use(express.json());
 
-// Endpoint principal
+// ENDPOINT PRINCIPAL
 app.get("/", (req, res) => {
   res.send("Servidor del bot funcionando 🚀");
 });
 
-// Webhook GET: verificación de Meta
+// WEBHOOK GET: Verificación de Meta
 app.get("/webhook", (req, res) => {
   const VERIFY_TOKEN = "bryan123"; // token de verificación
   const mode = req.query["hub.mode"];
@@ -23,7 +23,7 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-// Webhook POST: recibe mensajes y responde menú
+// WEBHOOK POST: recibe mensajes y responde automáticamente
 app.post("/webhook", async (req, res) => {
   try {
     const messages = req.body.entry?.[0]?.changes?.[0]?.value?.messages;
@@ -49,13 +49,13 @@ Por favor elige una opción respondiendo con el número:
     }
 
     await axios.post(
-      `https://graph.facebook.com/v17.0/${PHONE_NUMBER_ID}/messages`,
+      `https://graph.facebook.com/v17.0/116586229808120/messages`,
       {
         messaging_product: "whatsapp",
         to: from,
         text: { body: reply },
       },
-      { headers: { Authorization: `Bearer ${TOKEN}` } }
+      { headers: { Authorization: `Bearer EAAW7lqynL1wBQyaWFf4V30yM4uYeoSxP7rZBxfSGW7mgPPrVglaSuuVZAtCVPATc5BZBiKA8XSWpoyhGinbjbrPrCRZBjZCGRCKoZCInQ6o3QPnmLzuRTfwZCaE93aefS628gfaMK4XVZApmJTHRxtsf3QTDqA9ZBjmRjKutVk3jQUHoI83q4eZC89yqofa3ZAs8dE4K6hqPGJW0VsGIL27alE2bKAc0Q2PGeGB3CkFM1IpH3ZAB9ffKQEKPKnT0AkSTlK7rii4L54TTy9BSuZATKLZCWKZBYIJCFudrE4ZD` } }
     );
 
     res.sendStatus(200);
@@ -64,10 +64,6 @@ Por favor elige una opción respondiendo con el número:
     res.sendStatus(500);
   }
 });
-
-// Reemplaza con tus datos de Meta
-const TOKEN = "TU_TEMPORARY_ACCESS_TOKEN";
-const PHONE_NUMBER_ID = "TU_PHONE_NUMBER_ID";
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
