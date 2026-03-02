@@ -8,9 +8,9 @@ app.get("/", (req, res) => {
   res.send("Servidor del bot funcionando 🚀");
 });
 
-// 👇 Webhook GET: Verificación con Meta
+// Webhook GET: Verificación con Meta
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "bryan123"; // Token que pondrás también en Meta
+  const VERIFY_TOKEN = "bryan123"; // Pega este mismo token en Meta
 
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -19,14 +19,14 @@ app.get("/webhook", (req, res) => {
   if (mode && token) {
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
       console.log("Webhook verificado correctamente!");
-      res.status(200).send(challenge);
+      res.send(challenge); // Solo texto plano
     } else {
       res.sendStatus(403);
     }
   }
 });
 
-// 👇 Webhook POST: Aquí llegan los mensajes
+// Webhook POST: Aquí llegan los mensajes de WhatsApp
 app.post("/webhook", (req, res) => {
   console.log("Mensaje recibido:", JSON.stringify(req.body, null, 2));
   res.sendStatus(200);
