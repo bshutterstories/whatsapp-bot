@@ -25,10 +25,10 @@ app.post("/webhook", async (req, res) => {
 
   // DICCIONARIO AMPLIADO DE PALABRAS CLAVE (Útiles para fotografía)
   const palabrasActivadoras = [
-    "hola", "menu", "precio", "informacion", "info", "fotos", "fotografia", 
-    "interesa", "buenas", "sesion", "cotizacion", "cotizar", "paquetes", 
-    "costo", "vale", "agendar", "disponibilidad", "cita", "lugar", "ubicacion", 
-    "horario", "portafolio", "book", "tardes", "dias", "noches"
+    "hola", "menu", "precio", "informacion", "info", "fotos", "fotografia", "quiero",
+    "interesa", "buenas", "sesion", "cotización", "cotizar", "paquetes","información",  
+    "costo", "vale", "agendar", "disponibilidad", "cita", "lugar", "ubicación", "buenos",
+    "horario", "portafolio", "book", "tardes", "dias", "noches", "ubicacion", "cotizacion", "video", 
   ];
   
   // Verifica si alguna palabra del diccionario está dentro del mensaje del cliente
@@ -43,7 +43,7 @@ app.post("/webhook", async (req, res) => {
         interactive: {
           type: "list",
           header: { type: "text", text: "B Shutter Stories" },
-          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot para ayudarte con tu consulta" },
+          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot 🤖 para ayudarte con tu consulta" },
           action: {
             button: "Ver opciones",
             sections: [
