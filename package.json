@@ -1,17 +1,13 @@
 {
-  "name": "bot-whatsapp-bryan",
+  "name": "bot-whatsapp",
   "version": "1.0.0",
-  "description": "Bot de respuestas automáticas para WhatsApp",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo 'No tests configured' && exit 0"
+    "start": "node index.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "express": "^4.18.2"
-  },
-  "engines": {
-    "node": "18.x"
   }
 }
