@@ -7,6 +7,9 @@ const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDel
 const PHONE_ID = "948993161640189"; 
 const WEBHOOK_TOKEN = "bryan123";
 
+// Ruta de prueba para ver en el navegador
+app.get("/", (req, res) => res.send("Bot funcionando ✅"));
+
 app.get("/webhook", (req, res) => {
   if (req.query["hub.verify_token"] === WEBHOOK_TOKEN) return res.send(req.query["hub.challenge"]);
   res.sendStatus(403);
@@ -17,53 +20,48 @@ app.post("/webhook", async (req, res) => {
   if (!msg) return res.sendStatus(200);
 
   const from = msg.from;
-  const input = msg.type === "interactive" ? msg.interactive.list_reply.id : msg.text?.body.toLowerCase().trim();
+  const input = msg.type === "interactive" ? msg.interactive.list_reply.id : msg.text?.body?.toLowerCase().trim();
 
-  if (input === "hola" || input === "menu") {
-    await enviarMenu(from);
-  } else if (input === "op_cat") {
-    await enviarTexto(from, "📸 *Catálogo y Precios:*\nhttps://wa.me/c/50687086658");
-  } else if (input === "op_paq") {
-    await enviarTexto(from, "📦 *PAQUETES BRYAN:*\n\n✨ *Mini:* 6 fotos / 45 min / No cambios / ₡42,000\n🔥 *Mid:* 10 fotos / 1 hr / 1 cambio / ₡47,000\n👑 *Full:* 15 fotos / 1.5 hr / 2 cambios / ₡52,000");
-  } else if (input === "op_ubi") {
-    await enviarTexto(from, "📍 *UBICACIÓN:* Escazú, San Antonio.\n⏰ *HORARIO:* L-V 9am-7pm / S-D 9am-3pm.");
-  } else if (input === "op_port") {
-    await enviarTexto(from, "🖼️ *PORTAFOLIO:* https://bshutterstories.pixieset.com/bshutterportfolio/");
-  } else if (input === "op_bry") {
-    await enviarTexto(from, "🚀 ¡Listo! Bryan ya recibió tu notificación y te escribirá pronto.");
-  }
+  // Respuestas rápidas
+  let textOut = "";
+  if (input === "hola" || input === "menu") return await enviarMenu(from, res);
+  if (input === "op_cat") textOut = "📸 Catálogo: https://wa.me/c/50687086658";
+  else if (input === "op_paq") textOut = "📦 *PAQUETES:*\n✨ Mini: ₡42k\n🔥 Mid: ₡47k\n👑 Full: ₡52k";
+  else if (input === "op_ubi") textOut = "📍 Escazú, San Antonio.\n⏰ L-V 9am-7pm / S-D 9am-3pm.";
+  else if (input === "op_port") textOut = "🖼️ Portafolio: https://bshutterstories.pixieset.com/bshutterportfolio/";
+  else if (input === "op_bry") textOut = "🚀 Bryan te contactará pronto.";
 
+  if (textOut) await enviarTexto(from, textOut);
   res.sendStatus(200);
 });
 
-async function enviarMenu(to) {
+async function enviarMenu(to, res) {
   try {
     await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
-      messaging_product: "whatsapp",
-      to: to,
-      type: "interactive",
+      messaging_product: "whatsapp", to, type: "interactive",
       interactive: {
-        type: "list",
-        header: { type: "text", text: "BShutter Stories 📸" },
-        body: { text: "¡Hola! Selecciona una opción del menú:" },
-        footer: { text: "Asistente Virtual" },
+        type: "list", header: { type: "text", text: "BShutter Stories 📸" },
+        body: { text: "¡Hola! Elige una opción:" },
         action: {
           button: "Ver Opciones",
           sections: [
-            { title: "Precios", rows: [
-                { id: "op_cat", title: "Catálogo", description: "Ver catálogo de WhatsApp" },
-                { id: "op_paq", title: "Paquetes", description: "Detalles Mini, Mid y Full" }
-            ]},
-            { title: "Info", rows: [
-                { id: "op_ubi", title: "Ubicación", description: "Horarios y lugar" },
-                { id: "op_port", title: "Portafolio", description: "Mira mi trabajo" },
-                { id: "op_bry", title: "Hablar con Bryan", description: "Agendar sesión" }
-            ]}
+            { title: "Precios", rows: [{ id: "op_cat", title: "Catálogo" }, { id: "op_paq", title: "Paquetes" }] },
+            { title: "Info", rows: [{ id: "op_ubi", title: "Ubicación" }, { id: "op_port", title: "Portafolio" }, { id: "op_bry", title: "Agendar" }] }
           ]
         }
       }
     }, { headers: { Authorization: `Bearer ${TOKEN}` } });
-  } catch (e) { console.log("Error:", e.response?.data || e.message); }
+  } catch (e) { console.log("Error Menu:", e.message); }
+  res.sendStatus(200);
 }
 
-async function enviarTexto(to, text
+async function enviarTexto(to, text) {
+  try {
+    await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
+      messaging_product: "whatsapp", to, text: { body: text }
+    }, { headers: { Authorization: `Bearer ${TOKEN}` } });
+  } catch (e) { console.log("Error Texto:", e.message); }
+}
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, "0.0.0.0", () => console.log(`Puerto: ${PORT}`));
