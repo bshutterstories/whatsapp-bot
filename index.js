@@ -4,82 +4,38 @@ const app = express();
 
 app.use(express.json());
 
-// CONFIGURACIÓN DE TU CUENTA META
-const TOKEN = "EAAW7lqynL1wBQ4BqiZCJxWgMYgZCCpL3DRZAXrw8XeYsdCd8egUu9Hw3S1xbqvLP9xxd0Orb6fPOe7hThNSEIcSCOvO1v19fyWgQKhywZArdnx1FFnc18PA0lNUBMbo4EAGvqMhZC3KCC9fcsiozZCzo1tcYOke27ml9gWj1dnCOXdWMQLzxN3ReZAotSi5WoBZCz6AC26p1tFxxbkpPi9izE1QjNO2rORxZAQ2PBRzP9MGXUgJyYtDtu9Lx6GlczaOHB9hnfGC7e4YFSjpx5pucDRNxrduuxGo4ZD";
-const PHONE_ID = "116586229808120";
-const VERIFY_TOKEN = "bryan123";
+// CONFIGURACIÓN (Tu nuevo token permanente)
+const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDelX9fKN7MJoRfDkvXEwGDWXcEkNtvVJrMDxtLXXiUdFCm7VwlcJtbeI4KBughVp53wvA1xx8pMZBAWsVZAPP0dEsU7ZCbo7lN9jJAP11FWptvUseGeBR2Y9ndiGhmFtg1AZDZD";
+const WEBHOOK_TOKEN = "bryan123";
+const PHONE_ID = "116586229808120"; // Tu ID de teléfono de Meta
 
-// 1. RUTA DE PRUEBA (Para ver en el navegador)
-app.get("/", (req, res) => {
-  res.send("Servidor del bot funcionando 🚀");
-});
-
-// 2. VERIFICACIÓN DEL WEBHOOK PARA META
+// WEBHOOK PARA META (Verificación)
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    res.send(challenge);
+  if (mode === "subscribe" && token === WEBHOOK_TOKEN) {
+    res.status(200).send(challenge);
   } else {
     res.sendStatus(403);
   }
 });
 
-// 3. RECEPCIÓN DE MENSAJES Y RESPUESTA AUTOMÁTICA
+// RECEPCIÓN DE MENSAJES
 app.post("/webhook", async (req, res) => {
-  try {
-    const entry = req.body.entry?.[0]?.changes?.[0]?.value;
-    const messages = entry?.messages;
+  const body = req.body;
 
-    // Si no es un mensaje (ej. notificación de entrega), respondemos 200 y salimos
-    if (!messages || !messages[0]) {
-      return res.sendStatus(200);
-    }
+  if (body.object === "whatsapp_business_account") {
+    if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages) {
+      const msg = body.entry[0].changes[0].value.messages[0];
+      const from = msg.from;
+      const text = msg.text ? msg.text.body.toLowerCase() : "";
 
-    const from = messages[0].from;
-    const text = messages[0].text?.body?.trim() || "";
+      console.log("Mensaje recibido de:", from, "Texto:", text);
 
-    // LÓGICA DEL MENÚ DE WHATSAPP
-    let reply = "";
-    if (text === "1") {
-      reply = "📸 *Servicios:* Fotografía profesional, eventos y sesiones individuales.";
-    } else if (text === "2") {
-      reply = "📍 *Horarios:* Lun-Vie 9am-6pm. San José, Costa Rica. Tel: +50612345678.";
-    } else if (text === "3") {
-      reply = "💰 *Precios:* Sesiones desde $50. ¡Consulta paquetes especiales!";
-    } else {
-      reply = "¡Hola! 👋 Gracias por escribir al número de prueba (+1 555 157 9070).\n\nPor favor, elige una opción enviando el número:\n\n1️⃣ Información de servicios\n2️⃣ Horarios y ubicación\n3️⃣ Precios y promociones";
-    }
-
-    // ENVÍO DE LA RESPUESTA POR WHATSAPP API
-    await axios.post(
-      `https://graph.facebook.com/v17.0/${PHONE_ID}/messages`,
-      {
-        messaging_product: "whatsapp",
-        to: from,
-        type: "text",
-        text: { body: reply },
-      },
-      {
-        headers: { 
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json"
-        },
-      }
-    );
-
-    res.sendStatus(200);
-  } catch (err) {
-    // Si hay un error, lo imprime en los logs de Railway sin tumbar el servidor
-    console.error("Error en el bot:", err.response?.data || err.message);
-    res.sendStatus(200); 
-  }
-});
-
-// 4. INICIO DEL SERVIDOR (Ajustado para Railway)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Bot activo y escuchando en el puerto ${PORT}`);
-});
+      // LÓGICA DEL MENÚ
+      if (text === "hola" || text === "menu") {
+        await enviarWhatsApp(from, "¡Hola! Bienvenido al bot de Bryan. \nElige una opción:\n1. Servicios\n2. Horarios\n3. Hablar con un humano");
+      } else if (text === "1") {
+        await enviarWhatsApp(from, "Of
