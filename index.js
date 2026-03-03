@@ -3,27 +3,25 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// --- TUS DATOS ---
+// --- CONFIGURACIÓN ---
 const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDelX9fKN7MJoRfDkvXEwGDWXcEkNtvVJrMDxtLXXiUdFCm7VwlcJtbeI4KBughVp53wvA1xx8pMZBAWsVZAPP0dEsU7ZCbo7lN9jJAP11FWptvUseGeBR2Y9ndiGhmFtg1AZDZD";
 const PHONE_ID = "948993161640189"; 
 const WEBHOOK_TOKEN = "bryan123";
 
-// 1. Verificación para Meta (ESTO ES LO QUE HACE QUE EL BOTON DE GUARDAR FUNCIONE)
+// 1. ESTA FUNCIÓN ES LA QUE DESBLOQUEA EL ERROR DE META
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
-  if (mode && token) {
-    if (mode === "subscribe" && token === WEBHOOK_TOKEN) {
-      console.log("WEBHOOK_VERIFIED");
-      return res.status(200).send(challenge);
-    }
+  if (mode === "subscribe" && token === WEBHOOK_TOKEN) {
+    console.log("¡WEBHOOK VALIDADO POR META! ✅");
+    return res.status(200).send(challenge);
   }
   res.sendStatus(403);
 });
 
-// 2. Recepción de mensajes y lógica de botones
+// 2. RECEPCIÓN DE MENSAJES (TU LÓGICA PUNTUAL)
 app.post("/webhook", async (req, res) => {
   const msg = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   if (!msg) return res.sendStatus(200);
@@ -54,7 +52,7 @@ app.post("/webhook", async (req, res) => {
               {
                 title: "Información y Citas",
                 rows: [
-                  { id: "op_3", title: "Ubicacion y horario", description: "Ver dónde estoy" },
+                  { id: "op_3", title: "Ubicacion y horario", description: "Ver donde estoy" },
                   { id: "op_4", title: "Ver mi portafolio de clientes", description: "Link a Pixieset" },
                   { id: "op_5", title: "Estoy listo para agendar, quiero hablar con Bryan.", description: "Hablar con Bryan" }
                 ]
@@ -77,12 +75,9 @@ app.post("/webhook", async (req, res) => {
         }, { headers: { Authorization: `Bearer ${TOKEN}` } });
       }
     }
-  } catch (e) { console.log("Error API"); }
+  } catch (e) { console.log("Error de envío:", e.response?.data || e.message); }
   res.sendStatus(200);
 });
 
-// 3. Configuración del puerto para Railway
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, "0.0.0.0", () => console.log(`Servidor activo puerto ${PORT}`));
