@@ -50,14 +50,14 @@ app.post("/webhook", async (req, res) => {
               {
                 title: "Precio y Catálogos",
                 rows: [
-                  { id: "op_1", title: "Catálogos y precios", description: "1 catalogos y precios" },
-                  { id: "op_2", title: "Paquetes y precios", description: "Ver detalle Mini, Mid y Full" }
+                  { id: "op_1", title: "Catálogos y precios", description: "catalogos y precios" },
+                  { id: "op_2", title: "Paquetes y precios", description: "Ver paquetes Mini, Mid y Full" }
                 ]
               },
               {
                 title: "Información y Citas",
                 rows: [
-                  { id: "op_3", title: "Ubicación y horario", description: "Ver donde estoy" },
+                  { id: "op_3", title: "Ubicación y horario", description: "Ver ubicación" },
                   { id: "op_4", title: "Portafolio clientes", description: "Ver mi portafolio de clientes" },
                   { id: "op_5", title: "Hablar con Bryan", description: "Estoy listo para agendar, quiero hablar con Bryan." }
                 ]
