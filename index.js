@@ -31,14 +31,14 @@ app.post("/webhook", async (req, res) => {
         interactive: {
           type: "list",
           header: { type: "text", text: "B Shutter Stories" },
-          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot para ayudarte con tu consulta" },
+          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot 🤖 para ayudarte con tu consulta" },
           action: {
             button: "Ver opciones",
             sections: [
               {
                 title: "Precio y Catálogos",
                 rows: [
-                  { id: "op_1", title: "Catálogos y precios", description: "1 catalogos y precios" },
+                  { id: "op_1", title: "Catálogos y precios", description: "catalogos y precios" },
                   { id: "op_2", title: "Paquetes y precios", description: "Ver detalle Mini, Mid y Full" }
                 ]
               },
