@@ -3,25 +3,18 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// --- CONFIGURACIÓN ---
 const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDelX9fKN7MJoRfDkvXEwGDWXcEkNtvVJrMDxtLXXiUdFCm7VwlcJtbeI4KBughVp53wvA1xx8pMZBAWsVZAPP0dEsU7ZCbo7lN9jJAP11FWptvUseGeBR2Y9ndiGhmFtg1AZDZD";
 const PHONE_ID = "948993161640189"; 
 const WEBHOOK_TOKEN = "bryan123";
 
-// 1. ESTA FUNCIÓN ES LA QUE DESBLOQUEA EL ERROR DE META
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
-
-  if (mode === "subscribe" && token === WEBHOOK_TOKEN) {
-    console.log("¡WEBHOOK VALIDADO POR META! ✅");
-    return res.status(200).send(challenge);
-  }
+  if (mode === "subscribe" && token === WEBHOOK_TOKEN) return res.status(200).send(challenge);
   res.sendStatus(403);
 });
 
-// 2. RECEPCIÓN DE MENSAJES (TU LÓGICA PUNTUAL)
 app.post("/webhook", async (req, res) => {
   const msg = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   if (!msg) return res.sendStatus(200);
@@ -45,16 +38,16 @@ app.post("/webhook", async (req, res) => {
               {
                 title: "Precio y Catálogos",
                 rows: [
-                  { id: "op_1", title: "1 catalogos y precios", description: "Link al catálogo" },
-                  { id: "op_2", title: "paquetes y precios", description: "Ver detalle Mini, Mid y Full" }
+                  { id: "op_1", title: "Catálogos y precios", description: "1 catalogos y precios" },
+                  { id: "op_2", title: "Paquetes y precios", description: "Ver detalle Mini, Mid y Full" }
                 ]
               },
               {
                 title: "Información y Citas",
                 rows: [
-                  { id: "op_3", title: "Ubicacion y horario", description: "Ver donde estoy" },
-                  { id: "op_4", title: "Ver mi portafolio de clientes", description: "Link a Pixieset" },
-                  { id: "op_5", title: "Estoy listo para agendar, quiero hablar con Bryan.", description: "Hablar con Bryan" }
+                  { id: "op_3", title: "Ubicación y horario", description: "Ver donde estoy" },
+                  { id: "op_4", title: "Portafolio clientes", description: "Ver mi portafolio de clientes" },
+                  { id: "op_5", title: "Hablar con Bryan", description: "Estoy listo para agendar, quiero hablar con Bryan." }
                 ]
               }
             ]
@@ -75,7 +68,7 @@ app.post("/webhook", async (req, res) => {
         }, { headers: { Authorization: `Bearer ${TOKEN}` } });
       }
     }
-  } catch (e) { console.log("Error de envío:", e.response?.data || e.message); }
+  } catch (e) { console.log("Error de envío:", JSON.stringify(e.response?.data)); }
   res.sendStatus(200);
 });
 
