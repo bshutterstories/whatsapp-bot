@@ -7,6 +7,10 @@ const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDel
 const PHONE_ID = "948993161640189"; 
 const WEBHOOK_TOKEN = "bryan123";
 
+// --- INICIO DE LÓGICA DE SILENCIO ---
+const usuariosSilenciados = new Map();
+// --- FIN DE LÓGICA DE SILENCIO ---
+
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
@@ -23,7 +27,18 @@ app.post("/webhook", async (req, res) => {
   const rawInput = (msg.text?.body || "").toLowerCase().trim();
   const inputId = msg.type === "interactive" ? msg.interactive.list_reply.id : "";
 
-  // DICCIONARIO AMPLIADO DE PALABRAS CLAVE (Útiles para fotografía)
+  // --- FILTRO DE SILENCIO ---
+  if (usuariosSilenciados.has(from)) {
+    const tiempoExpiracion = usuariosSilenciados.get(from);
+    if (Date.now() < tiempoExpiracion) {
+      console.log(`Bot silenciado para ${from}. Bryan está al mando.`);
+      return res.sendStatus(200);
+    } else {
+      usuariosSilenciados.delete(from); // El tiempo pasó, el bot puede volver a actuar
+    }
+  }
+  // --- FIN FILTRO ---
+
   const palabrasActivadoras = [
     "hola", "menu", "precio", "informacion", "info", "fotos", "fotografia", "quiero",
     "interesa", "buenas", "sesion", "cotización", "cotizar", "paquetes","información",  
@@ -31,7 +46,6 @@ app.post("/webhook", async (req, res) => {
     "horario", "portafolio", "book", "tardes", "dias", "noches", "ubicacion", "cotizacion", "video", 
   ];
   
-  // Verifica si alguna palabra del diccionario está dentro del mensaje del cliente
   const debeActivarMenu = palabrasActivadoras.some(palabra => rawInput.includes(palabra));
 
   try {
@@ -72,7 +86,11 @@ app.post("/webhook", async (req, res) => {
       else if (inputId === "op_2") txt = "Paquete Mini 📸:\n6 fotografias, sesion de 45 minutos máximo sin cambios de ropa adicionales. 42,000 mil colones.\n\nPaquete Mid 📸: 10 fotografias, sesion de una hora y un cambio extra de ropa. (El mas popular entre los clientes) 47,000 mil colones\n\nPaquete Full 📸: 15 fotografias, sesion de una hora y media con 2 cambios de ropa. 52,000 mil colones.";
       else if (inputId === "op_3") txt = "Estoy ubicado en San Jose, Escazu, San Antonio. Y de Lunes a Viernes de 9:00 am a 7:00 pm, Sabados y Domingos de 9:00 am a 3:00 pm.";
       else if (inputId === "op_4") txt = "https://bshutterstories.pixieset.com/bshutterportfolio/";
-      else if (inputId === "op_5") txt = "Ya Bryan te escribira en unos minutos para agendar tu espacio 📸";
+      else if (inputId === "op_5") {
+        txt = "Ya Bryan te escribirá en unos minutos para agendar tu espacio 📸. (El chatbot se desactivará para ti por 24 horas).";
+        // ACTIVAR EL SILENCIO POR 24 HORAS
+        usuariosSilenciados.set(from, Date.now() + (24 * 60 * 60 * 1000));
+      }
 
       if (txt) {
         await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
