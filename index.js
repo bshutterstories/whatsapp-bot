@@ -7,7 +7,6 @@ const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDel
 const PHONE_ID = "948993161640189"; 
 const WEBHOOK_TOKEN = "bryan123";
 
-// Ruta de prueba para ver en el navegador
 app.get("/", (req, res) => res.send("Bot funcionando ✅"));
 
 app.get("/webhook", (req, res) => {
@@ -22,46 +21,44 @@ app.post("/webhook", async (req, res) => {
   const from = msg.from;
   const input = msg.type === "interactive" ? msg.interactive.list_reply.id : msg.text?.body?.toLowerCase().trim();
 
-  // Respuestas rápidas
-  let textOut = "";
-  if (input === "hola" || input === "menu") return await enviarMenu(from, res);
-  if (input === "op_cat") textOut = "📸 Catálogo: https://wa.me/c/50687086658";
-  else if (input === "op_paq") textOut = "📦 *PAQUETES:*\n✨ Mini: ₡42k\n🔥 Mid: ₡47k\n👑 Full: ₡52k";
-  else if (input === "op_ubi") textOut = "📍 Escazú, San Antonio.\n⏰ L-V 9am-7pm / S-D 9am-3pm.";
-  else if (input === "op_port") textOut = "🖼️ Portafolio: https://bshutterstories.pixieset.com/bshutterportfolio/";
-  else if (input === "op_bry") textOut = "🚀 Bryan te contactará pronto.";
+  // --- LÓGICA DE RESPUESTAS CON TU INFO EXACTA ---
+  
+  if (input === "hola" || input === "menu") {
+    await enviarMenu(from, res);
+  } 
+  else if (input === "op_catalogo_precios") {
+    await enviarTexto(from, "Aquí puedes ver nuestros catálogos y precios oficiales:\nhttps://wa.me/c/50687086658");
+  } 
+  else if (input === "op_paquetes_detalle") {
+    const textoPaquetes = "*Paquete Mini:* \n6 fotografias, sesion de 45 minutos máximo sin cambios de ropa adicionales. 42,000 mil colones.\n\n" +
+                          "*Paquete Mid:* \n10 fotografias, sesion de una hora y un cambio extra de ropa. (El mas popular entre los clientes) 47,000 mil colones.\n\n" +
+                          "*Paquete Full:* \n15 fotografias, sesion de una hora y media con 2 cambios de ropa. 52,000 mil colones.";
+    await enviarTexto(from, textoPaquetes);
+  } 
+  else if (input === "op_ubicacion_horario") {
+    await enviarTexto(from, "Estoy ubicado en San Jose, Escazu, San Antonio. Y de Lunes a Viernes de 9:00 am a 7:00 pm, Sabado y Domingo de 9:00 am a 3:00 pm.");
+  } 
+  else if (input === "op_portafolio") {
+    await enviarTexto(from, "Mira mi portafolio de clientes aquí:\nhttps://bshutterstories.pixieset.com/bshutterportfolio/");
+  } 
+  else if (input === "op_hablar_bryan") {
+    await enviarTexto(from, "Estoy listo para agendar, quiero hablar con Bryan.");
+  }
 
-  if (textOut) await enviarTexto(from, textOut);
-  res.sendStatus(200);
+  if (!res.headersSent) res.sendStatus(200);
 });
 
 async function enviarMenu(to, res) {
   try {
     await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
-      messaging_product: "whatsapp", to, type: "interactive",
+      messaging_product: "whatsapp",
+      to: to,
+      type: "interactive",
       interactive: {
-        type: "list", header: { type: "text", text: "BShutter Stories 📸" },
-        body: { text: "¡Hola! Elige una opción:" },
+        type: "list",
+        header: { type: "text", text: "BShutter Stories 📸" },
+        body: { text: "¡Hola! Soy el asistente virtual. Por favor seleccioná una opción del menú para ayudarte:" },
+        footer: { text: "Menú interactivo" },
         action: {
-          button: "Ver Opciones",
-          sections: [
-            { title: "Precios", rows: [{ id: "op_cat", title: "Catálogo" }, { id: "op_paq", title: "Paquetes" }] },
-            { title: "Info", rows: [{ id: "op_ubi", title: "Ubicación" }, { id: "op_port", title: "Portafolio" }, { id: "op_bry", title: "Agendar" }] }
-          ]
-        }
-      }
-    }, { headers: { Authorization: `Bearer ${TOKEN}` } });
-  } catch (e) { console.log("Error Menu:", e.message); }
-  res.sendStatus(200);
-}
-
-async function enviarTexto(to, text) {
-  try {
-    await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
-      messaging_product: "whatsapp", to, text: { body: text }
-    }, { headers: { Authorization: `Bearer ${TOKEN}` } });
-  } catch (e) { console.log("Error Texto:", e.message); }
-}
-
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, "0.0.0.0", () => console.log(`Puerto: ${PORT}`));
+          button: "Ver opciones",
+          sections:
