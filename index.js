@@ -20,10 +20,22 @@ app.post("/webhook", async (req, res) => {
   if (!msg) return res.sendStatus(200);
 
   const from = msg.from;
-  const input = msg.type === "interactive" ? msg.interactive.list_reply.id : (msg.text?.body || "").toLowerCase().trim();
+  const rawInput = (msg.text?.body || "").toLowerCase().trim();
+  const inputId = msg.type === "interactive" ? msg.interactive.list_reply.id : "";
+
+  // DICCIONARIO AMPLIADO DE PALABRAS CLAVE (Útiles para fotografía)
+  const palabrasActivadoras = [
+    "hola", "menu", "precio", "informacion", "info", "fotos", "fotografia", 
+    "interesa", "buenas", "sesion", "cotizacion", "cotizar", "paquetes", 
+    "costo", "vale", "agendar", "disponibilidad", "cita", "lugar", "ubicacion", 
+    "horario", "portafolio", "book", "tardes", "dias", "noches"
+  ];
+  
+  // Verifica si alguna palabra del diccionario está dentro del mensaje del cliente
+  const debeActivarMenu = palabrasActivadoras.some(palabra => rawInput.includes(palabra));
 
   try {
-    if (input === "hola" || input === "menu") {
+    if (debeActivarMenu || inputId === "menu_principal") {
       await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
         messaging_product: "whatsapp",
         to: from,
@@ -31,14 +43,14 @@ app.post("/webhook", async (req, res) => {
         interactive: {
           type: "list",
           header: { type: "text", text: "B Shutter Stories" },
-          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot 🤖 para ayudarte con tu consulta" },
+          body: { text: "Gracias por escribir a B Shutter Stories: Te habla el chatbot para ayudarte con tu consulta" },
           action: {
             button: "Ver opciones",
             sections: [
               {
                 title: "Precio y Catálogos",
                 rows: [
-                  { id: "op_1", title: "Catálogos y precios", description: "catalogos y precios" },
+                  { id: "op_1", title: "Catálogos y precios", description: "1 catalogos y precios" },
                   { id: "op_2", title: "Paquetes y precios", description: "Ver detalle Mini, Mid y Full" }
                 ]
               },
@@ -56,11 +68,11 @@ app.post("/webhook", async (req, res) => {
       }, { headers: { Authorization: `Bearer ${TOKEN}` } });
     } else {
       let txt = "";
-      if (input === "op_1") txt = "Mira mi portafolio https://wa.me/c/50687086658";
-      else if (input === "op_2") txt = "Paquete Mini 📸:\n6 fotografias, sesion de 45 minutos máximo sin cambios de ropa adicionales. 42,000 mil colones.\n\nPaquete Mid 📸: 10 fotografias, sesion de una hora y un cambio extra de ropa. (El mas popular entre los clientes) 47,000 mil colones\n\nPaquete Full 📸: 15 fotografias, sesion de una hora y media con 2 cambios de ropa. 52,000 mil colones.";
-      else if (input === "op_3") txt = "Estoy ubicado en San Jose, Escazu, San Antonio. Y de Lunes a Viernes de 9:00 am a 7:00 pm, Sabados y Domingos de 9:00 am a 3:00 pm.";
-      else if (input === "op_4") txt = "https://bshutterstories.pixieset.com/bshutterportfolio/";
-      else if (input === "op_5") txt = "Ya Bryan te escribira en unos minutos para agendar tu espacio 📸";
+      if (inputId === "op_1") txt = "Mira mi portafolio https://wa.me/c/50687086658";
+      else if (inputId === "op_2") txt = "Paquete Mini 📸:\n6 fotografias, sesion de 45 minutos máximo sin cambios de ropa adicionales. 42,000 mil colones.\n\nPaquete Mid 📸: 10 fotografias, sesion de una hora y un cambio extra de ropa. (El mas popular entre los clientes) 47,000 mil colones\n\nPaquete Full 📸: 15 fotografias, sesion de una hora y media con 2 cambios de ropa. 52,000 mil colones.";
+      else if (inputId === "op_3") txt = "Estoy ubicado en San Jose, Escazu, San Antonio. Y de Lunes a Viernes de 9:00 am a 7:00 pm, Sabados y Domingos de 9:00 am a 3:00 pm.";
+      else if (inputId === "op_4") txt = "https://bshutterstories.pixieset.com/bshutterportfolio/";
+      else if (inputId === "op_5") txt = "Ya Bryan te escribira en unos minutos para agendar tu espacio 📸";
 
       if (txt) {
         await axios.post(`https://graph.facebook.com/v18.0/${PHONE_ID}/messages`, {
@@ -68,7 +80,7 @@ app.post("/webhook", async (req, res) => {
         }, { headers: { Authorization: `Bearer ${TOKEN}` } });
       }
     }
-  } catch (e) { console.log("Error de envío:", JSON.stringify(e.response?.data)); }
+  } catch (e) { console.log("Error:", JSON.stringify(e.response?.data)); }
   res.sendStatus(200);
 });
 
