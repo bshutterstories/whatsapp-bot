@@ -82,7 +82,7 @@ app.post("/webhook", async (req, res) => {
       }, { headers: { Authorization: `Bearer ${TOKEN}` } });
     } else {
       let txt = "";
-      if (inputId === "op_1") txt = "Aquí te dejo el catalogo detallado, con los tipos de sesiones que hago y precios 📸: https://wa.me/c/50687086658";
+      if (inputId === "op_1") txt = "Aquí te dejo el catálogo detallado, con los tipos de sesiones que hago y precios 📸: https://wa.me/c/50687086658";
       else if (inputId === "op_2") txt = "Paquete Mini 📸:\n6 fotografias, sesion de 45 minutos máximo sin cambios de ropa adicionales. 42,000 mil colones.\n\nPaquete Mid 📸:\n10 fotografias, sesion de una hora y un cambio extra de ropa. (El mas popular entre los clientes) 47,000 mil colones\n\nPaquete Full 📸:\n15 fotografias, sesion de una hora y media con 2 cambios de ropa. 52,000 mil colones.";
       else if (inputId === "op_3") txt = "Estoy ubicado en San Jose, Escazú, San Antonio 📍. Y de Lunes a Viernes de 9:00 am a 7:00 pm, Sabados y Domingos de 9:00 am a 3:00 pm.";
       else if (inputId === "op_4") txt = "Te comparto un poco de los clintes que han confiando en mi trabajo: https://bshutterstories.pixieset.com/bshutterportfolio/";
