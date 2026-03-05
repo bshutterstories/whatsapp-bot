@@ -3,10 +3,11 @@ const axios = require("axios");
 const app = express();
 app.use(express.json());
 
-// CONFIGURACIÓN (RECUERDA: Mantén esto en secreto)
-const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDelX9fKN7MJoRfDkvXEwGDWXcEkNtvVJrMDxtLXXiUdFCm7VwlcJtbeI4KBughVp53wvA1xx8pMZBAWsVZAPP0dEsU7ZCbo7lN9jJAP11FWptvUseGeBR2Y9ndiGhmFtg1AZDZD";
-const PHONE_ID = "1048401435016270";
-const WEBHOOK_TOKEN = "bryan123";
+// CONFIGURACIÓN USANDO VARIABLES DE ENTORNO
+// En Railway, ve a "Variables" y agrega: TOKEN, PHONE_ID, WEBHOOK_TOKEN
+const TOKEN = process.env.TOKEN;
+const PHONE_ID = process.env.PHONE_ID;
+const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN;
 
 // 1. Verificación del Webhook
 app.get("/webhook", (req, res) => {
@@ -21,7 +22,7 @@ app.get("/webhook", (req, res) => {
     }
 });
 
-// 2. Ruta para ACTIVAR el número (Llama a esto una sola vez desde el navegador)
+// 2. Ruta para ACTIVAR el número
 app.get("/activar-numero", async (req, res) => {
     try {
         const url = `https://graph.facebook.com/v21.0/${PHONE_ID}/register`;
@@ -40,19 +41,25 @@ app.get("/activar-numero", async (req, res) => {
     }
 });
 
-// 3. Recepción de mensajes
+// 3. Recepción de mensajes (MEJORADA PARA QUE NO SE CAIGA)
 app.post("/webhook", async (req, res) => {
     try {
-        const value = req.body.entry[0].changes[0].value;
-        if (value.messages) {
+        const entry = req.body.entry[0];
+        const changes = entry.changes[0];
+        const value = changes.value;
+
+        if (value.messages && value.messages.length > 0) {
             const sender = value.messages[0].from;
-            const text = value.messages[0].text.body;
+            // Si no hay texto (ej: enviaron una imagen), ponemos un mensaje por defecto
+            const text = value.messages[0].text ? value.messages[0].text.body : "Mensaje multimedia recibido";
+            
             console.log(`Mensaje de ${sender}: ${text}`);
             await sendWhatsAppMessage(sender, "¡Hola! He recibido tu mensaje correctamente.");
         }
-        res.sendStatus(200);
+        res.sendStatus(200); // Siempre responder 200 a Meta
     } catch (error) {
-        res.sendStatus(500);
+        console.error("Error en webhook:", error.message);
+        res.sendStatus(200); 
     }
 });
 
@@ -67,5 +74,6 @@ async function sendWhatsAppMessage(to, text) {
     });
 }
 
-const PORT = process.env.PORT || 3000;
+// Usamos el puerto que asigne Railway, por defecto 8080
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Bot activo en puerto ${PORT}`));
