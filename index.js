@@ -5,7 +5,7 @@ app.use(express.json());
 
 const TOKEN = "EAAW7lqynL1wBQZBFrt5IluaZCvUgcmQJiy8ww3MG5Lj7wbrYgZC1Fr0vPEOKcDelX9fKN7MJoRfDkvXEwGDWXcEkNtvVJrMDxtLXXiUdFCm7VwlcJtbeI4KBughVp53wvA1xx8pMZBAWsVZAPP0dEsU7ZCbo7lN9jJAP11FWptvUseGeBR2Y9ndiGhmFtg1AZDZD";
 const PHONE_ID = "948993161640189"; 
-const WEBHOOK_TOKEN = "bryan123";
+const WEBHOOK_TOKEN = "bryan1234";
 
 // --- INICIO DE LÓGICA DE SILENCIO ---
 const usuariosSilenciados = new Map();
