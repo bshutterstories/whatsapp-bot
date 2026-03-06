@@ -7,7 +7,7 @@ app.use(express.json());
 // Configuracion de credenciales
 // He pegado el token que me diste directamente para evitar fallos de variables
 const TOKEN = "EAAW7lqynL1wBQ9yyyle4V0lp09BSnTlSUJN0VJlfDSkNtB0AReAycBfcWA3UscdUV6RrPcAq7lZBVGi5tJG2YIKPhbm3GhV3cHEHlqRyXI32lKjjpfafaPxOji9L5c1v6N0mWoZAIouYT0dQTr6jz6EOOMmzWO1fZB9zfhjkw53Hx65EztSnQ5ZASxnbRhKTd3OqQuDZBdAZDZD";
-const PHONE_ID = process.env.PHONE_ID || "1048401435016270"; 
+const PHONE_ID = process.env.PHONE_ID || "948993161640189"; 
 const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || "tu_token_de_verificacion";
 
 // 1. Verificación del Webhook (Lo que Meta usa para validar tu URL)
