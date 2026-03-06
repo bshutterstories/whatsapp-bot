@@ -4,55 +4,66 @@ const app = express();
 
 app.use(express.json());
 
-// Leer variables desde Railway (Asegúrate de que no tengan espacios al final)
-const TOKEN = process.env.TOKEN;
-const PHONE_ID = process.env.PHONE_ID;
-const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN;
+// Configuracion de credenciales
+// He pegado el token que me diste directamente para evitar fallos de variables
+const TOKEN = "EAAW7lqynL1wBQ9yyyle4V0lp09BSnTlSUJN0VJlfDSkNtB0AReAycBfcWA3UscdUV6RrPcAq7lZBVGi5tJG2YIKPhbm3GhV3cHEHlqRyXI32lKjjpfafaPxOji9L5c1v6N0mWoZAIouYT0dQTr6jz6EOOMmzWO1fZB9zfhjkw53Hx65EztSnQ5ZASxnbRhKTd3OqQuDZBdAZDZD";
+const PHONE_ID = process.env.PHONE_ID || "1048401435016270"; 
+const WEBHOOK_TOKEN = process.env.WEBHOOK_TOKEN || "tu_token_de_verificacion";
 
-// Verificación del Webhook
+// 1. Verificación del Webhook (Lo que Meta usa para validar tu URL)
 app.get('/webhook', (req, res) => {
-    if (req.query['hub.verify_token'] === WEBHOOK_TOKEN) {
-        res.send(req.query['hub.challenge']);
-    } else {
-        res.sendStatus(403);
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode && token) {
+        if (mode === 'subscribe' && token === WEBHOOK_TOKEN) {
+            console.log('WEBHOOK_VERIFIED');
+            res.status(200).send(challenge);
+        } else {
+            res.sendStatus(403);
+        }
     }
 });
 
-// Recepción de mensajes
+// 2. Recepción y respuesta de mensajes
 app.post('/webhook', async (req, res) => {
     try {
-        // Accedemos a los datos del mensaje
-        const entry = req.body.entry[0];
-        const changes = entry.changes[0];
-        const value = changes.value;
-        const message = value.messages ? value.messages[0] : null;
+        const body = req.body;
 
-        if (message) {
-            const from = message.from;
-            const text = message.text.body;
+        if (body.object === 'whatsapp_business_account') {
+            if (body.entry && body.entry[0].changes && body.entry[0].changes[0].value.messages) {
+                const message = body.entry[0].changes[0].value.messages[0];
+                const from = message.from; // Número del cliente
+                const msgText = message.text ? message.text.body : "Mensaje no recibido";
 
-            console.log(`Mensaje de ${from}: ${text}`);
+                console.log(`Mensaje recibido de ${from}: ${msgText}`);
 
-            // Respuesta automática estructurada correctamente para la API de WhatsApp
-            await axios.post(`https://graph.facebook.com/v22.0/${PHONE_ID}/messages`, {
-                messaging_product: 'whatsapp',
-                to: from,
-                type: 'text',
-                text: { 
-                    body: '¡Hola! He recibido tu mensaje correctamente.' 
-                }
-            }, {
-                headers: { 
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json' 
-                }
-            });
+                // Respuesta automática usando el nuevo Token
+                await axios({
+                    method: "POST",
+                    url: `https://graph.facebook.com/v22.0/${PHONE_ID}/messages`,
+                    data: {
+                        messaging_product: "whatsapp",
+                        to: from,
+                        type: "text",
+                        text: { body: "¡Hola! Gracias por contactarme. He recibido tu mensaje." }
+                    },
+                    headers: {
+                        "Authorization": `Bearer ${TOKEN}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+                
+                console.log("Respuesta enviada con éxito");
+            }
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(404);
         }
-        res.sendStatus(200);
     } catch (error) {
-        // Esto mostrará el error específico en los Logs de Railway
-        console.error('Error al procesar mensaje:', error.response?.data || error.message);
-        res.sendStatus(200);
+        console.error('Error detallado:', error.response ? error.response.data : error.message);
+        res.sendStatus(200); // Meta requiere un 200 siempre para no bloquear el webhook
     }
 });
 
